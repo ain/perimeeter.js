@@ -1,0 +1,54 @@
+{
+  "name": "perimeeter.js",
+  "version": "0.0.1",
+  "description": "perimeeter.js is a JavaScript geolocation library that fetches a number of addresses in the perimeter of user's location.",
+  "homepage": "https://github.com/ain/perimeeter.js",
+  "author": {
+    "name": "Ain Tohvri",
+    "email": "ain@flashbit.net"
+  },
+  "contributors": [
+    {
+      "name": "Ain Tohvri",
+      "email": "ain@flashbit.net"
+    }
+  ],
+  "bugs": "https://github.com/ain/perimeeter.js/issues",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-uglify": "~0.4.0",
+    "grunt-contrib-jshint": "~0.9.2",
+    "grunt-contrib-connect": "~0.7.1",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-mocha": "~0.4.10",
+    "jit-grunt": "~0.3.2",
+    "time-grunt": "~0.3.1",
+    "grunt-concurrent": "~0.5.0"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ain/perimeeter.js.git"
+  },
+  "licenses": [
+    {
+      "type": "GPL",
+      "url": "https://github.com/ain/perimeeter.js/blob/master/LICENSE"
+    }
+  ],
+  "scripts": {
+    "test": "grunt travis --verbose"
+  },
+  "keywords": [
+    "javascript",
+    "password",
+    "strength",
+    "security",
+    "meter"
+  ]
+}

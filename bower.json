@@ -1,0 +1,9 @@
+{
+  "name": "perimeeter.js",
+  "version": "0.0.1",
+  "dependencies": {
+    "js-signals": "~1.0.0"
+  },
+  "devDependencies": {
+  }
+}
