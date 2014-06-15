@@ -51,12 +51,13 @@
 
       var latitude = 53,
         longitude = 9,
-        coords;
+        coords,
+        error;
 
       beforeEach(function(done) {
         new Geolocation(latitude, longitude);
-        navigator.geolocation.getCurrentPosition(function(position) {
-          coords = position.coords;
+        navigator.geolocation.getCurrentPosition(function(response) {
+          coords = response.coords;
           done();
         });
       });
@@ -68,6 +69,18 @@
       it('expected to get predefined latitude and longitude', function() {
         return expect(coords).to.deep.equal({ latitude: latitude, longitude: longitude });
       });
+
+      it('expected to return internal error on error mock input', function(done) {
+        new Geolocation('error', 'error');
+        navigator.geolocation.getCurrentPosition(function(position) {
+          coords = position.coords;
+          done();
+        }, function(response) {
+          error = response;
+          done();
+        });
+        return expect(error).to.deep.equal({ code: 2, message: 'Internal error.' });
+      });
     });
 
     describe('position', function() {
@@ -75,7 +88,7 @@
       beforeEach(function(done) {
         geolocation = new Geolocation();
         perimeeter = new Perimeeter();
-        perimeeter.getSignals().positioned.add(function(position) {
+        perimeeter.getSignals().positioned.add(function() {
           done();
         });
         perimeeter.position();
@@ -92,6 +105,16 @@
         };
         return expect(perimeeter.getCoordinates()).to.deep.equal(coords);
       });
+
+     /* it('expected to throw error on geolocation failure', function() {
+        function position() {
+          latitude: geolocation.latitude,
+          longitude: geolocation.longitude
+        }
+
+        geolocation = new Geolocation('error', 'error');
+        return expect(perimeeter.getCoordinates()).to.deep.equal(coords);
+      });*/
 
 
 

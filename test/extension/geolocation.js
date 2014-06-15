@@ -19,8 +19,17 @@ var Geolocation = (function() {
     var self = this;
     window.navigator.geolocation =
     {
-      getCurrentPosition: function(callback) {
-        callback({ coords: { latitude: self.latitude, longitude: self.longitude } });
+      getCurrentPosition: function(successCallback, errorCallback) {
+        if (self.latitude !== 'error' || self.longitude !== 'error')  {
+          successCallback({ coords: { latitude: self.latitude, longitude: self.longitude } });
+        }
+        else {
+          var error = {
+            code: 2,
+            message: 'Internal error.'
+          };
+          errorCallback(error);
+        }
       }
     };
   }
