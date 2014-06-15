@@ -88,7 +88,7 @@ var Perimeeter = (function() {
   };
 
   Perimeeter.isCapablePlatform = function() {
-    return !!navigator.geolocation;
+    return 'geolocation' in navigator;
   };
 
   return Perimeeter;
