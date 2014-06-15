@@ -64,11 +64,6 @@ var Perimeeter = (function() {
     return signalCollection;
   };
 
-  /*Perimeeter.prototype.addSignals = function() {
-    signals.positioned = new Signal();
-    signals.approximated = new Signal();
-  };*/
-
   Perimeeter.prototype.getRadius = function() {
     return this.options.radius;
   };
@@ -90,8 +85,6 @@ var Perimeeter = (function() {
 
   Perimeeter.prototype.position = function() {
     navigator.geolocation.getCurrentPosition(handleCurrentPositionSuccess, handleCurrentPositionFailure);
-    //var geocoder = new Geocoder();
-    //geocoder.geocode();
   };
 
   Perimeeter.isCapablePlatform = function() {

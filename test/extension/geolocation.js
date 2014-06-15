@@ -20,7 +20,7 @@ var Geolocation = (function() {
     window.navigator.geolocation =
     {
       getCurrentPosition: function(successCallback, errorCallback) {
-        if (self.latitude !== 'error' || self.longitude !== 'error')  {
+        if (self.latitude !== 'error' && self.longitude !== 'error')  {
           successCallback({ coords: { latitude: self.latitude, longitude: self.longitude } });
         }
         else {

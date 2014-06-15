@@ -106,17 +106,17 @@
         return expect(perimeeter.getCoordinates()).to.deep.equal(coords);
       });
 
-     /* it('expected to throw error on geolocation failure', function() {
-        function position() {
-          latitude: geolocation.latitude,
-          longitude: geolocation.longitude
+      it('expected to throw error on geolocation failure', function(done) {
+        new Geolocation('error');
+        perimeeter = new Perimeeter();
+        perimeeter.getSignals().positioned.add(function() {
+          done();
+        });
+        function test() {
+          perimeeter.position();
         }
-
-        geolocation = new Geolocation('error', 'error');
-        return expect(perimeeter.getCoordinates()).to.deep.equal(coords);
-      });*/
-
-
+        return expect(test).to.throw(Error);
+      });
 
     });
   });
