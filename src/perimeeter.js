@@ -4,7 +4,7 @@
 
 /* exported Perimeeter */
 /* global navigator */
-/* global Geocoder */
+/* global google */
 /* global signals */
 var Perimeeter = (function() {
 
@@ -21,7 +21,6 @@ var Perimeeter = (function() {
       located: null
     },
     geocoder;
-
 
   function parseRadius(radius) {
     var parsedRadius = parseFloat(radius);
@@ -57,12 +56,8 @@ var Perimeeter = (function() {
   }
 
   function getGeocoderRequest() {
-
     var request = {
-      //bounds: google.maps.LatLngBounds()
-      //'latLng': new google.maps.LatLng(coords.latitude, coords.longitude)
-      'latLng': new google.maps.LatLng(53, 9),
-      'address': 'Robert'
+      'latLng': new google.maps.LatLng(coords.latitude, coords.longitude)
     };
     return request;
   }
