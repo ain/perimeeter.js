@@ -120,7 +120,7 @@
 
     });
 
-    describe('locate', function() {
+    describe('locate', function(done) {
 
       var locationResponse;
 
@@ -142,37 +142,35 @@
         return expect(locationResponse.geocoderStatus).to.equal('OK');
       });
 
-      it('expected to get result Array', function() {
-        return expect(locationResponse.geocoderResults).to.be.instanceof(Array);
+      it('expected to get non-empty result Array', function() {
+        return expect(locationResponse.geocoderResults).to.be.instanceof(Array) &&
+          expect(locationResponse.geocoderResults).to.not.be.empty;
       });
 
-      it('expected to get more than 0 results', function() {
-        return expect(locationResponse.geocoderResults).to.not.be.empty;
-      });
-
-      it('expected to get address with address components ', function() {
-        return expect(locationResponse.geocoderResults[0].address_components).to.be.instanceof(Array);
-      });
-
-      it('expected to get address with formatted address', function() {
-        return expect(locationResponse.geocoderResults[0].formatted_address).to.be.string;
-      });
-
-      it('expected to get address with geometry', function() {
-        return expect(locationResponse.geocoderResults[0].geometry).to.be.object;
-      });
-
-      it('expected to get address with partial match', function() {
-        return expect(locationResponse.geocoderResults[0].partial_match).to.be.boolean;
+      it('expected to get address with all meaningful non-empty properties', function() {
+        return expect(locationResponse.geocoderResults[0]).to.contain.keys('address_components', 'formatted_address', 'geometry');
       });
 
       /*
        * Postcode localities may not be there.
        * TODO find coordinates that have localities.
        */
-      /*it('expected to get address with postcode localities', function() {
+      /*it.skip('expected to get address with postcode localities', function() {
         return expect(locationResponse.geocoderResults[0].postcode_localities).to.be.instanceof(Array);
       });*/
+
+      it('expected to get address with non-empty properties long and short name, type(s)', function() {
+        return expect(locationResponse.geocoderResults[0].address_components[0]).to.contain.keys('long_name', 'short_name', 'types');
+      });
+
+      it('expected to get address with non-empty formatted address', function() {
+        return expect(locationResponse.geocoderResults[0].formatted_address).to.be.not.empty;
+      });
+
+      it('expected to get address geometry matching user\'s location', function() {
+        return expect(locationResponse.geocoderResults[0].geometry).to.equal({ lat: 53, lng: 9 });
+      });
+
 
     });
 
