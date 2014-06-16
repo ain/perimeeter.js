@@ -18,8 +18,9 @@ var Perimeeter = (function() {
     },
     signalCollection = {
       positioned: null,
-      approximated: null
-    };
+      located: null
+    },
+    geocoder;
 
 
   function parseRadius(radius) {
@@ -52,7 +53,33 @@ var Perimeeter = (function() {
 
   function addSignals() {
     signalCollection.positioned = new Signal();
-    signalCollection.approximated = new Signal();
+    signalCollection.located = new Signal();
+  }
+
+  function getGeocoderRequest() {
+
+    var request = {
+      //bounds: google.maps.LatLngBounds()
+      //'latLng': new google.maps.LatLng(coords.latitude, coords.longitude)
+      'latLng': new google.maps.LatLng(53, 9),
+      'address': 'Robert'
+    };
+    return request;
+  }
+
+  function handleCurrentPositionSuccess(position) {
+    coords = position.coords;
+    signalCollection.positioned.dispatch(coords);
+  }
+
+  function handleCurrentPositionFailure() {
+    var error = new Error('Failed to get current position!');
+    signalCollection.positioned.dispatch(error);
+    throw error;
+  }
+
+  function handleGeocoderResult(results, status) {
+    signalCollection.located.dispatch({geocoderResults: results, geocoderStatus: status});
   }
 
   function Perimeeter(options) {
@@ -72,19 +99,14 @@ var Perimeeter = (function() {
     return coords;
   };
 
-  function handleCurrentPositionSuccess(position) {
-    coords = position.coords;
-    signalCollection.positioned.dispatch(coords);
-  }
-
-  function handleCurrentPositionFailure() {
-    var error = new Error('Failed to get current position!');
-    signalCollection.positioned.dispatch(error);
-    throw error;
-  }
-
   Perimeeter.prototype.position = function() {
     navigator.geolocation.getCurrentPosition(handleCurrentPositionSuccess, handleCurrentPositionFailure);
+  };
+
+  Perimeeter.prototype.getAddress = function() {
+    var request = getGeocoderRequest();
+    geocoder = new google.maps.Geocoder();
+    geocoder.geocode(request, handleGeocoderResult);
   };
 
   Perimeeter.isCapablePlatform = function() {

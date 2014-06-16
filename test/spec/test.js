@@ -119,5 +119,62 @@
       });
 
     });
+
+    describe('locate', function() {
+
+      var locationResponse;
+
+      beforeEach(function(done) {
+        geolocation = new Geolocation();
+        perimeeter = new Perimeeter();
+        perimeeter.getSignals().located.add(function(response) {
+          locationResponse = response;
+          done();
+        });
+        perimeeter.getAddress();
+      });
+
+      it('expected to get response object', function() {
+        return expect(locationResponse).to.be.object;
+      });
+
+      it('expected to get OK status', function() {
+        return expect(locationResponse.geocoderStatus).to.equal('OK');
+      });
+
+      it('expected to get result Array', function() {
+        return expect(locationResponse.geocoderResults).to.be.instanceof(Array);
+      });
+
+      it('expected to get more than 0 results', function() {
+        return expect(locationResponse.geocoderResults).to.not.be.empty;
+      });
+
+      it('expected to get address with address components ', function() {
+        return expect(locationResponse.geocoderResults[0].address_components).to.be.instanceof(Array);
+      });
+
+      it('expected to get address with formatted address', function() {
+        return expect(locationResponse.geocoderResults[0].formatted_address).to.be.string;
+      });
+
+      it('expected to get address with geometry', function() {
+        return expect(locationResponse.geocoderResults[0].geometry).to.be.object;
+      });
+
+      it('expected to get address with partial match', function() {
+        return expect(locationResponse.geocoderResults[0].partial_match).to.be.boolean;
+      });
+
+      /*
+       * Postcode localities may not be there.
+       * TODO find coordinates that have localities.
+       */
+      /*it('expected to get address with postcode localities', function() {
+        return expect(locationResponse.geocoderResults[0].postcode_localities).to.be.instanceof(Array);
+      });*/
+
+    });
+
   });
 })();
