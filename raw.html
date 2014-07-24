@@ -11,7 +11,7 @@
   <script src="bower_components/js-signals/dist/signals.min.js"></script>
   <style type="text/css">
     body {font-family:Helvetica-Neue, Helvetica, Arial, sans-serif; color:#0068B7; margin: 10px 0;}
-    h1, p, #loader, #parsepoint, .button {
+    h1, p, #loader, pre, .button {
       margin-left: 20px;
       margin-right: 20px;
     }
@@ -76,6 +76,8 @@
       });
       perimeeter.getSignals().located.add(function(response) {
         document.body.removeChild(loader);
+        var addy = document.createElement('pre');
+        addy.textContent = response.geocoderResults[0].formatted_address;
         var pre = document.createElement('pre');
         pre.setAttribute('class', 'parsepoint');
         pre.textContent = JSON.stringify(response);
@@ -85,6 +87,7 @@
         button.setAttribute('class', 'button');
         button.setAttribute('href', 'mailto:ain@flashbit.net?subject=Raw geocode&body=' + JSON.stringify(response));
         heading.parentNode.insertBefore(button, heading.nextSibling);
+        heading.parentNode.insertBefore(addy, heading.nextSibling);
       });
       perimeeter.position();
     };
