@@ -14,6 +14,7 @@ var Perimeeter = (function() {
     coords = null,
     defaults = {
       radius: 0,
+      maxResults: 1,
       capabilityDetection: false
     },
     signalCollection = {
@@ -30,9 +31,20 @@ var Perimeeter = (function() {
     throw new TypeError('Invalid option for radius! Number expected.');
   }
 
+  function parseMaxResults(value) {
+    var parsedMaxResults = parseFloat(value);
+    if (/^\d+$/.test(parsedMaxResults)) {
+      return parsedMaxResults;
+    }
+    throw new TypeError('Invalid option for max. results! Number expected.');
+  }
+
   function parseOption(option, value) {
     if (option === 'radius') {
       return parseRadius(value);
+    }
+    else if (option === 'maxResults') {
+      return parseMaxResults(value);
     }
     return value;
   }
@@ -88,6 +100,10 @@ var Perimeeter = (function() {
 
   Perimeeter.prototype.getRadius = function() {
     return this.options.radius;
+  };
+
+  Perimeeter.prototype.getMaxResults = function() {
+    return this.options.maxResults;
   };
 
   Perimeeter.prototype.getCoordinates = function() {

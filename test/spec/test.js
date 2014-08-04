@@ -23,9 +23,18 @@
         return expect(perimeeter.getRadius()).to.equal(0);
       });
 
+      it('expected to default max. results to 1', function() {
+        return expect(perimeeter.getMaxResults()).to.equal(1);
+      });
+
       it('expected to set radius from constructor', function() {
         perimeeter = new Perimeeter({radius: 20});
         return expect(perimeeter.getRadius()).to.equal(20);
+      });
+
+      it('expected to set max. results from constructor', function() {
+        perimeeter = new Perimeeter({maxResults: 5});
+        return expect(perimeeter.getMaxResults()).to.equal(5);
       });
 
       it('expected to throw type error on String input', function() {
@@ -81,6 +90,7 @@
         });
         return expect(error).to.deep.equal({ code: 2, message: 'Internal error.' });
       });
+
     });
 
     describe('position', function() {
