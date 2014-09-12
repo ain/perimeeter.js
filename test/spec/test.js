@@ -187,5 +187,53 @@
 
     });
 
+    describe('nearby locations', function(){
+      var locations, coords;
+
+      before(function(done){
+        perimeeter = new Perimeeter({
+          radius: 1, // 1 km
+          maxResults: 5
+        });
+        locations = perimeeter.getNearbyAddresses();
+        coords = perimeeter.getCoordinates();
+        done();
+      });
+
+      it('expected to get set number of results', function(){
+        return expect(locations.length).to.be.equal(perimeeter.getMaxResults());
+      });
+
+      function degreesToRadians(d) {
+        return d * (Math.PI/180);
+      }
+
+      // Distance is calculated using Haversine Formula(http://en.wikipedia.org/wiki/Haversine_formula)
+      function getDistance(p1, p2) {
+        // Use 3960.056052 for miles
+        var earthRadius = 6372.796924,
+          phi1 = degreesToRadians(p1.latitude),
+          phi2 = degreesToRadians(p2.latitude),
+          delta1 = degreesToRadians(p2.latitude - p1.latitude),
+          delta2 = degreesToRadians(p2.longitude - p1.longitude),
+          a, c;
+
+        a = Math.sin(delta1/2) * Math.sin(delta1/2) + Math.cos(phi1) * Math.cos(phi2) * Math.sin(delta2/2) * Math.sin(delta2/2);
+        c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return earthRadius * c;
+      }
+
+      it('expected all locations to be within set radius', function(){
+        locations.forEach(function(location, index){
+          describe('test location ' + (index+1) + ' distance', function(){
+            it('expected location ' + (index+1) + ' to be within set radius', function(){
+              return expect(getDistance(location, coords)).to.be.within(0, perimeeter.getRadius());
+            });
+          });
+        });
+      });
+    });
+
   });
 })();
