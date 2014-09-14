@@ -55,42 +55,59 @@
     .button:hover {
       opacity: 0.8;
     }
+    #map {
+      width: 100%;
+      height: 70vh;
+      background: transparent url('loader.gif') center center no-repeat;
+    }
   </style>
 </head>
 <body>
   <h1>Mobile geolocation test</h1>
+  <div id="map"></div>
   <div class="footnote">
     <p>Current test deploys Google Maps API and Works on all mobile platforms that support W3C Geolocation standard.</p>
     <p>Copyright @ 2014 Ain Tohvri, OÜ Flashbit. All rights reserved.</p>
   </div>
   <script type="text/javascript" src="https://github.com/ain/perimeeter.js/raw/master/src/perimeeter.js"></script>
   <script type="text/javascript">
-    var loader = document.createElement('div');
-    loader.setAttribute('id', 'loader');
-    var heading = document.querySelector('h1');
-    heading.parentNode.insertBefore(loader, heading.nextSibling);
-    window.onload = function() {
-      var perimeeter = new Perimeeter();
-      perimeeter.getSignals().positioned.add(function(response) {
-        perimeeter.getAddress();
+  window.onload = function() {
+    var perimeeter = new Perimeeter({
+      radius: 0.1,
+      maxResults: 5
+    }), map;
+
+    perimeeter.getSignals().positioned.add(function(){
+      var coords = perimeeter.getCoordinates();
+      map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 18,
+        center: {
+          lat: coords.latitude,
+          lng: coords.longitude
+        }
       });
-      perimeeter.getSignals().located.add(function(response) {
-        document.body.removeChild(loader);
-        var addy = document.createElement('pre');
-        addy.textContent = response.geocoderResults[0].formatted_address;
-        var pre = document.createElement('pre');
-        pre.setAttribute('class', 'parsepoint');
-        pre.textContent = JSON.stringify(response);
-        heading.parentNode.insertBefore(pre, heading.nextSibling);
-        var button = document.createElement('a');
-        button.textContent = "Email";
-        button.setAttribute('class', 'button');
-        button.setAttribute('href', 'mailto:ain@flashbit.net?subject=Raw geocode&body=' + JSON.stringify(response));
-        heading.parentNode.insertBefore(button, heading.nextSibling);
-        heading.parentNode.insertBefore(addy, heading.nextSibling);
+      perimeeter.getAddress();
+    });
+
+    perimeeter.getSignals().located.add(function(locations){
+      var allCoords = perimeeter.getNearbyCoordinates();
+      allCoords.unshift(perimeeter.getCoordinates());
+      allCoords.forEach(function(coords,index){
+        var marker = new google.maps.Marker({
+          position: new google.maps.LatLng(coords.latitude, coords.longitude),
+          map: map,
+          title: locations[index].geocoderResults[0].formatted_address
+        }),
+        infoWindow =  new google.maps.InfoWindow({
+          content: '<h4>' + locations[index].geocoderResults[0].formatted_address + '</h4>(' + coords.latitude + ', ' + coords.longitude + ')'
+        });
+
+        google.maps.event.addListener(marker, 'click', function(){ infoWindow.open(map, marker); });
       });
-      perimeeter.position();
-    };
+    });
+
+    perimeeter.position();
+  };
   </script>
 </body>
 </html>
