@@ -12,11 +12,14 @@ var Perimeeter = (function() {
 
   var Signal = signals.Signal,
     coords = null,
+    nearbyCoords = null,
     defaults = {
       radius: 0,
       maxResults: 1,
-      capabilityDetection: false
+      capabilityDetection: false,
+      distanceUnit: 'km'
     },
+    parsedOptions,
     signalCollection = {
       positioned: null,
       located: null
@@ -92,9 +95,33 @@ var Perimeeter = (function() {
     return request;
   }
 
+  function calculateNearbyCoordinates() {
+    var lat = degreesToRadians(coords.latitude),
+      lng = degreesToRadians(coords.longitude),
+      earthRadius = (parsedOptions.distanceUnit === 'mi') ? 3960.056052 : 6372.796924,
+      maxDistance = parsedOptions.radius/earthRadius,
+      randomDistance, bearing,
+      newLat, newLng,
+      i;
+
+    nearbyCoords = [];
+
+    for ( i = 0; i < parsedOptions.maxResults; i++ ) {
+      randomDistance = Math.acos((Math.random() * (Math.cos(maxDistance) - 1 )) + 1);
+      bearing = Math.PI * 2 * Math.random();
+      newLat = Math.asin((Math.sin(lat) * Math.cos(randomDistance)) + (Math.cos(lat) * Math.sin(randomDistance) * Math.cos(bearing)));
+      newLng = normalizeLongitude(lng + Math.atan2(Math.sin(bearing) * Math.sin(randomDistance) * Math.cos(lat), Math.cos(randomDistance) - Math.sin(lat) * Math.sin(newLat)));
+      nearbyCoords.push({
+        'latitude': radiansToDegrees(newLat),
+        'longitude': radiansToDegrees(newLng)
+      });
+    }
+  }
+
   function handleCurrentPositionSuccess(position) {
     coords = position.coords;
-    signalCollection.positioned.dispatch(coords);
+    calculateNearbyCoordinates();
+    signalCollection.positioned.dispatch(coords, nearbyCoords);
   }
 
   function handleCurrentPositionFailure() {
@@ -104,11 +131,35 @@ var Perimeeter = (function() {
   }
 
   function handleGeocoderResult(results, status) {
-    signalCollection.located.dispatch({geocoderResults: results, geocoderStatus: status});
+    var index = 0,
+      request,
+      args = [{geocoderResults: results, geocoderStatus: status}];
+
+    function _handleGeocoderResult(results, status) {
+      args.push({geocoderResults: results, geocoderStatus: status});
+      index++;
+      if ( index < parsedOptions.maxResults ) {
+        setTimeout(_nextGeocoderRequest, 200);
+      } else {
+        signalCollection.located.dispatch(args);
+      }
+    }
+
+    function _nextGeocoderRequest() {
+      request = getGeocoderRequest(nearbyCoords[index]);
+      geocoder.geocode(request, _handleGeocoderResult);
+    }
+
+    if (parsedOptions.maxResults) {
+      _nextGeocoderRequest();
+    } else {
+      signalCollection.located.dispatch(args);
+    }
   }
 
   function Perimeeter(options) {
     this.options = options ? parseOptions(options) : defaults;
+    parsedOptions = this.options;
     addSignals();
   }
 
@@ -128,6 +179,10 @@ var Perimeeter = (function() {
     return coords;
   };
 
+  Perimeeter.prototype.getNearbyCoordinates = function() {
+    return nearbyCoords;
+  };
+
   Perimeeter.prototype.position = function() {
     navigator.geolocation.getCurrentPosition(handleCurrentPositionSuccess, handleCurrentPositionFailure);
   };
@@ -136,44 +191,6 @@ var Perimeeter = (function() {
     var request = getGeocoderRequest(coords);
     geocoder = new google.maps.Geocoder();
     geocoder.geocode(request, handleGeocoderResult);
-  };
-
-  // Queue gecoding requests to avoid OVER_QUERY_LIMIT error
-  function queueAddressGeocode(coords) {
-    var request = getGeocoderRequest(coords);
-    setTimeout(function(){
-      geocoder.geocode(request, handleGeocoderResult);
-    }, 2000);
-  }
-
-  Perimeeter.prototype.getNearbyAddresses = function() {
-    if ( typeof coords !== 'object' ) {
-      throw new Error('Failed to get current position.');
-    }
-
-    var lat = degreesToRadians(coords.latitude),
-      lng = degreesToRadians(coords.longitude),
-      // Mean km radius of Earth. Use 3960.056052 for miles
-      earthRadius = 6372.796924,
-      maxDistance = this.getRadius()/earthRadius,
-      randomDistance, bearing,
-      newLat, newLng,
-      i, location, locations = [];
-
-    for ( i = 0; i < this.getMaxResults(); i++ ) {
-      randomDistance = Math.acos((Math.random() * (Math.cos(maxDistance) - 1 )) + 1);
-      bearing = Math.PI * 2 * Math.random();
-      newLat = Math.asin((Math.sin(lat) * Math.cos(randomDistance)) + (Math.cos(lat) * Math.sin(randomDistance) * Math.cos(bearing)));
-      newLng = normalizeLongitude(lng + Math.atan2(Math.sin(bearing) * Math.sin(randomDistance) * Math.cos(lat), Math.cos(randomDistance) - Math.sin(lat) * Math.sin(newLat)));
-      location = {
-        'latitude': radiansToDegrees(newLat),
-        'longitude': radiansToDegrees(newLng)
-      };
-      locations.push(location);
-      queueAddressGeocode(location);
-    }
-
-    return locations;
   };
 
   Perimeeter.isCapablePlatform = function() {
