@@ -1,0 +1,35 @@
+{
+  "name": "perimeeter.js",
+  "description": "perimeeter.js is a JavaScript geolocation library that fetches a number of addresses in the perimeter of user's location.",
+  "main": "src/perimeeter.js",
+  "version": "0.1.0",
+  "license": "GPL-3.0",
+  "ignore": [
+    ".git*",
+    "test/",
+    "**/.*",
+    "Gruntfile.js"
+  ],
+  "dependencies": {
+    "js-signals": "~1.0.0"
+  },
+  "devDependencies": {},
+  "authors": [
+    "Ain Tohvri <ain@flashbit.net>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ain/perimeeter.js.git"
+  },
+  "homepage": "https://github.com/ain/perimeeter.js",
+  "_release": "0.1.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.0",
+    "commit": "c74f784e049051246debc9369b360bd37e6d58f1"
+  },
+  "_source": "git://github.com/ain/perimeeter.js.git",
+  "_target": "~0.1.0",
+  "_originalSource": "perimeeter.js",
+  "_direct": true
+}

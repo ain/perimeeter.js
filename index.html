@@ -1,30 +1,59 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-    <head>
-        <title>Mobile geolocation test</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="Description" content="" />
-        <meta name="Keywords" content="" />
-        <meta name="Copyright" content="Copyright &copy; 2010 Flashbit LLC. All rights reserved." />
-        <meta name="Author" content="Flashbit LLC, www.flashbit.net" />
-        <meta name="viewport" content="width=400" />
-        <script type="text/javascript" src="jquery-1.4.2.min.js"></script>
-        <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAC-fflCZdgli1YC8Po-ya0hTSNDojDASVTwRAj18pVjTJARRTxBQZCJjwX9wCKWN4oHL7kt337nRTjQ" type="text/javascript"></script> 
-        <script type="text/javascript" src="geoloc.js"></script>
-        <style type="text/css">
-            body {font-family:Helvetica-Neue, Helvetica, Arial, sans-serif; color:#0068B7; margin:0px;}
-            h1, p, #loader {margin-left:20px; margin-right:20px;}  
-            .collapsed {display:none;}
-            .error {color:#ff0000;}
-            .footnote {background-color:#0068B7; padding-top:10px; padding-bottom:10px; color:#fff; margin-top:30px; font-size:0.5em;}
-            #loader {width:42px; height:42px; display:block; background:transparent url('loader.gif') no-repeat;}
-        </style>
-    </head>
-    <body>
-        <h1>Mobile geolocation test</h1>
-        <div class="footnote">
-            <p>Current test deploys Google Maps API and Works on all mobile platforms that support W3C Geolocation standard.</p>
-            <p>Copyright &copy; 2010 Flashbit LLC. All rights reserved.</p>
-        </div>
-    </body>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>perimeeter.js - Example</title>
+    <script src="http://maps.googleapis.com/maps/api/js?AIzaSyCK4OJf7xaO4L5wYp-eiIQSy26VNlmsdJ8&amp;sensor=false" type="text/javascript"></script>
+    <script src="bower_components/js-signals/dist/signals.js"></script>
+    <script src="bower_components/perimeeter.js/src/perimeeter.js"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h1>Mobile geolocation test</h1>
+    <div id="map"></div>
+    <ol id="address-list"></ol>
+    <div class="footnote">
+      <p>Current test deploys Google Maps API and Works on all mobile platforms that support W3C Geolocation standard.</p>
+      <p>Copyright @ 2014 Ain Tohvri, OÜ Flashbit. All rights reserved.</p>
+    </div>
+    <script type="text/javascript">
+      window.onload = function() {
+        var perimeeter = new Perimeeter({
+          radius: 0.1,
+          maxResults: 5
+        }), map;
+        perimeeter.getSignals().positioned.add(function(){
+          var coords = perimeeter.getCoordinates();
+          map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 18,
+            center: {
+              lat: coords.latitude,
+              lng: coords.longitude
+            }
+          });
+          perimeeter.getAddress();
+        });
+        perimeeter.getSignals().located.add(function(locations){
+          var allCoords = perimeeter.getNearbyCoordinates(),
+            list = '';
+          allCoords.unshift(perimeeter.getCoordinates());
+          allCoords.forEach(function(coords,index){
+            var marker = new google.maps.Marker({
+              position: new google.maps.LatLng(coords.latitude, coords.longitude),
+              map: map,
+              title: locations[index].geocoderResults[0].formatted_address
+            }),
+            infoWindow = new google.maps.InfoWindow({
+              content: '<h4>' + locations[index].geocoderResults[0].formatted_address + '</h4>(' + coords.latitude + ', ' + coords.longitude + ')'
+            });
+            google.maps.event.addListener(marker, 'click', function(){ infoWindow.open(map, marker); });
+            list += '<li>' + locations[index].geocoderResults[0].formatted_address + '</li>';
+          });
+          document.getElementById('address-list').innerHTML = list;
+        });
+        perimeeter.position();
+      };
+    </script>
+  </body>
 </html>
