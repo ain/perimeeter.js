@@ -1,6 +1,6 @@
 {
   "name": "perimeeter.js",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "perimeeter.js is a JavaScript geolocation library that fetches a number of addresses in the perimeter of user's location.",
   "homepage": "https://github.com/ain/perimeeter.js",
   "author": {
