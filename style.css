@@ -48,3 +48,6 @@ h1, p, #loader, pre, .button {
   height: 70vh;
   background: transparent url('loader.gif') center center no-repeat;
 }
+li:first-child {
+  font-weight: bold;
+}
