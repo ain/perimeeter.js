@@ -130,61 +130,117 @@
 
     });
 
-    describe('locate', function() {
+    describe('locate', function(){
+      var locations;
 
-      var locationResponse;
-
-      before(function(done) {
+      before(function(done){
         geolocation = new Geolocation();
-        perimeeter = new Perimeeter();
-        perimeeter.getSignals().located.add(function(response) {
-          locationResponse = response;
+        perimeeter = new Perimeeter({
+          radius: 0.1,
+          maxResults: 1
+        });
+        perimeeter.getSignals().located.add(function(response){
+          locations = response;
           done();
         });
         perimeeter.getAddress();
       });
 
-      it('expected to get response object', function() {
-        return expect(locationResponse).to.be.object;
+      it('expected to get locations array', function(){
+        return expect(locations).to.be.array;
       });
 
-      it('expected to get OK status', function() {
-        return expect(locationResponse.geocoderStatus).to.equal('OK');
+      it('expect to get set number of results + 1', function(){
+        return expect(locations.length).to.be.equal(perimeeter.getMaxResults() + 1);
       });
 
-      it('expected to get non-empty result Array', function() {
-        return expect(locationResponse.geocoderResults).to.be.instanceof(Array) &&
-          expect(locationResponse.geocoderResults).to.not.be.empty;
+      it('test each location', function(){
+        locations.forEach(function(locationResponse, index){
+          describe('test location ' + (index+1), function(){
+            it('expected to get response object', function() {
+              return expect(locationResponse).to.be.object;
+            });
+
+            it('expected to get OK status', function() {
+              return expect(locationResponse.geocoderStatus).to.equal('OK');
+            });
+
+            it('expected to get non-empty result Array', function() {
+              return expect(locationResponse.geocoderResults).to.be.instanceof(Array) &&
+                expect(locationResponse.geocoderResults).to.not.be.empty;
+            });
+
+            it('expected to get address with all meaningful non-empty properties', function() {
+              return expect(locationResponse.geocoderResults[0]).to.contain.keys('address_components', 'formatted_address', 'geometry');
+            });
+
+            /*
+            * Postcode localities may not be there.
+            * TODO find coordinates that have localities.
+            */
+            /*it.skip('expected to get address with postcode localities', function() {
+            return expect(locationResponse.geocoderResults[0].postcode_localities).to.be.instanceof(Array);
+            });*/
+
+            it('expected to get address with non-empty properties long and short name, type(s)', function() {
+              return expect(locationResponse.geocoderResults[0].address_components[0]).to.contain.keys('long_name', 'short_name', 'types');
+            });
+
+            it('expected to get address with non-empty formatted address', function() {
+              return expect(locationResponse.geocoderResults[0].formatted_address).to.be.not.empty;
+            });
+
+          });
+        });
       });
 
-      it('expected to get address with all meaningful non-empty properties', function() {
-        return expect(locationResponse.geocoderResults[0]).to.contain.keys('address_components', 'formatted_address', 'geometry');
+    });
+
+    describe('nearby location distances', function(){
+      var startCoords,
+        nearbyCoords;
+
+      before(function(done){
+        perimeeter = new Perimeeter({
+          radius: 0.1,
+          maxResults: 5
+        });
+        perimeeter.getSignals().positioned.add(function(){
+          startCoords = perimeeter.getCoordinates();
+          nearbyCoords = perimeeter.getNearbyCoordinates();
+          done();
+        });
+        perimeeter.position();
       });
 
-      /*
-       * Postcode localities may not be there.
-       * TODO find coordinates that have localities.
-       */
-      /*it.skip('expected to get address with postcode localities', function() {
-        return expect(locationResponse.geocoderResults[0].postcode_localities).to.be.instanceof(Array);
-      });*/
+      function degreesToRadians(d) {
+        return d * (Math.PI/180);
+      }
 
-      it('expected to get address with non-empty properties long and short name, type(s)', function() {
-        return expect(locationResponse.geocoderResults[0].address_components[0]).to.contain.keys('long_name', 'short_name', 'types');
+      // Distance is calculated using Haversine Formula(http://en.wikipedia.org/wiki/Haversine_formula)
+      function getDistance(p1, p2) {
+        var earthRadius = (perimeeter.options.distanceUnit === 'mi') ? 3960.056052 : 6372.796924,
+          phi1 = degreesToRadians(p1.latitude),
+          phi2 = degreesToRadians(p2.latitude),
+          delta1 = degreesToRadians(p2.latitude - p1.latitude),
+          delta2 = degreesToRadians(p2.longitude - p1.longitude),
+          a, c;
+
+        a = Math.sin(delta1/2) * Math.sin(delta1/2) + Math.cos(phi1) * Math.cos(phi2) * Math.sin(delta2/2) * Math.sin(delta2/2);
+        c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return earthRadius * c;
+      }
+
+      it('expected all coordinates to be within set radius', function(){
+        nearbyCoords.forEach(function(coords, index){
+          describe('test coords ' + (index+1) + ' distance', function(){
+            it('expected coords ' + (index+1) + ' to be within set radius', function(){
+              return expect(getDistance(startCoords, coords)).to.be.within(0, perimeeter.getRadius());
+            });
+          });
+        });
       });
-
-      it('expected to get address with non-empty formatted address', function() {
-        return expect(locationResponse.geocoderResults[0].formatted_address).to.be.not.empty;
-      });
-
-      /*
-       * Debug call.
-       */
-      it.skip('expected to get address geometry matching user\'s location', function() {
-        return expect(locationResponse.geocoderResults[0]).to.deep.equal({ lat: 53, lng: 9 });
-      });
-
-
     });
 
   });
